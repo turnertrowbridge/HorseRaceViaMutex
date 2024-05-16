@@ -3,9 +3,10 @@ import random
 import time
 import os
 
-NUM_HORSES = 1
+NUM_HORSES = 9
 RACE_LENGTH = 30
 HORSE_DISTANCE = 3
+
 
 def update_horse(i, mutex, start_time, shared_data):
     while shared_data["horses"][i] < RACE_LENGTH:
@@ -18,6 +19,7 @@ def update_horse(i, mutex, start_time, shared_data):
         shared_data["graphics"][i] += ("-> ")
     shared_data["horses_done"][i] = time.time() - start_time
 
+
 def print_race(shared_data):
     # Track when display is done
     local_done = False
@@ -27,23 +29,26 @@ def print_race(shared_data):
         print("Horse:")
         for i in range(len(shared_data["graphics"])):
             print(f"{i+1} | {shared_data["graphics"][i]}", end="")
-            
+
             # Print finish line by adding spaces between position and finish line
             distance_from_end = RACE_LENGTH - shared_data["horses"][i]
-            print(" " * distance_from_end, end = "")
+            print(" " * distance_from_end, end="")
             if shared_data["horses_done"][i]:
-                print(f" |*| ", end = "")
+                print(f" |*| ", end="")
                 if shared_data["winner"] == i:
-                    print(f"Horse {i + 1} wins in {shared_data["horses_done"][i]:.2f}s!", end = "")
+                    print(
+                        f"Horse {i + 1} wins in {shared_data["horses_done"][i]:.2f}s!", end="")
                 else:
-                    print(f"Done in {shared_data["horses_done"][i]:.2f}s.", end = "")
+                    print(
+                        f"Done in {shared_data["horses_done"][i]:.2f}s.", end="")
             else:
-                print(" " * HORSE_DISTANCE, end ="")
-                print(" | | ", end = "")
+                print(" " * HORSE_DISTANCE, end="")
+                print(" | | ", end="")
             print()
         if all(shared_data["horses_done"]):
             local_done = True
         time.sleep(0.3)
+
 
 def place_bet(betting_balance):
     horse = input(f"Enter the horse you wish to bet on (1-{NUM_HORSES}): ")
@@ -55,6 +60,7 @@ def place_bet(betting_balance):
         return False
     betting_balance[1] = (int(horse), int(bet))  # Save bet
     return True
+
 
 def menu(betting_balance):
     while True:
@@ -70,8 +76,9 @@ def menu(betting_balance):
             if bet_confirmed:
                 winner = start_race()
                 if winner == betting_balance[1][0] - 1:
-                    print(f"You won by betting on horse {betting_balance[1][0]}!")
-                    betting_balance[0] += betting_balance[1][1] 
+                    print(f"You won by betting on horse {
+                          betting_balance[1][0]}!")
+                    betting_balance[0] += betting_balance[1][1]
                 else:
                     print("You lose!")
                     betting_balance[0] -= betting_balance[1][1]
@@ -85,6 +92,7 @@ def menu(betting_balance):
         else:
             print("Invalid choice")
 
+
 def start_race():
     shared_data = {
         "horses": [0] * NUM_HORSES,
@@ -93,12 +101,13 @@ def start_race():
         "horses_done": [None] * NUM_HORSES,
         "finished": False,
         "winner": None,
-        }
+    }
     mutex = threading.Lock()
     threads = []
     start_time = time.time()
     for i in range(NUM_HORSES):
-        t = threading.Thread(target=update_horse, args=(i, mutex, start_time, shared_data))
+        t = threading.Thread(target=update_horse, args=(
+            i, mutex, start_time, shared_data))
         threads.append(t)
         t.start()
 
@@ -113,10 +122,12 @@ def start_race():
     print_thread.join()
     return shared_data["winner"]
 
+
 def main():
-    betting_balance = [100, (0, 0)] # [balance, (horse, bet)]
+    betting_balance = [100, (0, 0)]  # [balance, (horse, bet)]
     menu(betting_balance)
     print("Thanks for playing!")
-    
+
+
 if __name__ == "__main__":
     main()
